@@ -130,46 +130,104 @@ public class GemsLogic : MonoBehaviour {
         return new List<Field>();
     }
 
-    private void CheckField()
+    // counts lines and highlights fields
+    private int CheckField()
     {
-        foreach(Gem g in _gems)
-        {
-            List<Gem> gs = new List<Gem>();
-            ushort gcount = 0;
-            //check left/right
-            Field f = g.field;
-            while (f && f.gem && f.gem.gemType==g.gemType) { gcount++; gs.Add(f.gem); f = f.right; }
+        int totalLines = 0;
+        List<Gem> gs = new List<Gem>();
+        Field f = null;
+        ushort gcount = 0;
+
+        //check left/right 
+        foreach (Gem g in _gems) g.field.explored = false;
+        foreach (Gem g in _gems)
+        {           
+            f = g.field;
+            if (f.explored) continue;
+            gcount = 0;
+            gs.Clear();
+            while (f && f.gem && f.gem.gemType == g.gemType) { gcount++; gs.Add(f.gem); f = f.right; }
             f = g.field.left;
             while (f && f.gem && f.gem.gemType == g.gemType) { gcount++; gs.Add(f.gem); f = f.left; }
             if (gcount >= neededInRow)
             {
-                foreach (Gem l in gs) l.field.Activate();
+                Debug.Log(gs.Count + " in a row");
+                foreach (Gem l in gs) l.field.Activate(Color.yellow);
+                totalLines++;
             }
-
-
+            foreach (Gem l in gs) l.field.explored = true;
         }
-
-        /*//check rows
-        ushort curtype=16;
-        int typecount = 0;
-        for(int i = 0; i<rows; ++i)
+        //check up/down
+        foreach (Gem g in _gems) g.field.explored = false;
+        foreach (Gem g in _gems)
         {
-            Debug.Log("Check " + _fields[i*cols].name);
-            Field f = _fields[i * cols];
-            while (f)
+            f = g.field;
+            if (f.explored) continue;
+            gcount = 0;
+            gs.Clear();
+            while (f && f.gem && f.gem.gemType == g.gemType) { gcount++; gs.Add(f.gem); f = f.up; }
+            f = g.field.down;
+            while (f && f.gem && f.gem.gemType == g.gemType) { gcount++; gs.Add(f.gem); f = f.down; }
+            if (gcount >= neededInRow)
             {
-                if (f.gem)
-                {
-
-                }
-                f = f.right;
+                Debug.Log(gs.Count + " in a row");
+                foreach (Gem l in gs) l.field.Activate(Color.yellow);
+                totalLines++;
             }
         }
-        //check cols
-        for (int i = 0; i < cols; ++i)
+        //check diagonally/up
+        foreach (Gem g in _gems) g.field.explored = false;
+        foreach (Gem g in _gems)
         {
-            Debug.Log("Check " + _fields[i].name);
-        }*/
+            f = g.field;
+            if (f.explored) continue;
+            gcount = 0;
+            gs.Clear();
+            while (f && f.gem && f.gem.gemType == g.gemType) { gcount++; gs.Add(f.gem); f = f.up; if (f) f = f.right; }
+            f = g.field.down; if (f) f = f.left;
+            while (f && f.gem && f.gem.gemType == g.gemType) { gcount++; gs.Add(f.gem); f = f.down; if (f) f = f.left; }
+            if (gcount >= neededInRow)
+            {
+                Debug.Log(gs.Count + " in a row");
+                foreach (Gem l in gs) l.field.Activate(Color.yellow);
+                totalLines++;
+            }
+        }
+        //check diagonally/down
+        foreach (Gem g in _gems) g.field.explored = false;
+        foreach (Gem g in _gems)
+        {
+            f = g.field;
+            if (f.explored) continue;
+            gcount = 0;
+            gs.Clear();
+            while (f && f.gem && f.gem.gemType == g.gemType) { gcount++; gs.Add(f.gem); f = f.up; if (f) f = f.left; }
+            f = g.field.down; if (f) f = f.right;
+            while (f && f.gem && f.gem.gemType == g.gemType) { gcount++; gs.Add(f.gem); f = f.down; if (f) f = f.right; }
+            if (gcount >= neededInRow)
+            {
+                Debug.Log(gs.Count + " in a row");
+                foreach (Gem l in gs) l.field.Activate(Color.yellow);
+                totalLines++;
+            }
+        }
+        return totalLines;
+    }
+
+    // removes gems on highlighted fields
+    void ClearLines()
+    {
+        foreach(Field f in _fields)
+        {
+            if (f.highlighted)
+            {
+                //remove gem
+                _gems.Remove(f.gem);
+                Destroy(f.gem.gameObject);
+                f.gem = null;
+                f.Deactivate();
+            }
+        }
     }
 
 
@@ -179,8 +237,16 @@ public class GemsLogic : MonoBehaviour {
         {
             if (_activeGem.moving) return;
             _waitForGem = false;
-            CheckField();
-            NewGems(gemsPerRound);
+            int linescore = CheckField();
+            if (linescore > 0)
+            {
+                Debug.Log("Lines cleared: " + linescore);
+                ClearLines();
+            }
+            else
+            {
+                NewGems(gemsPerRound);
+            }
         }
         if (Input.GetKeyDown(KeyCode.Space))
         {
@@ -189,15 +255,7 @@ public class GemsLogic : MonoBehaviour {
             //StartCoroutine("CheckLost");
 
         }
-      
-        /*for (int p = 1; p<_activePath.Count-1;++p)
-        {
-            if (p == Mathf.FloorToInt(Time.time*3.0F) % (_activePath.Count - 1))
-                _activePath[p].Activate(Color.gray);
-            else _activePath[p].Deactivate();
-        }*/
-
-
+        // Click or touch
         if (Input.GetMouseButtonDown(0))
         {
             RaycastHit hit;

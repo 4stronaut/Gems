@@ -17,7 +17,7 @@ public class Gem : MonoBehaviour {
         gemType = t;
         //TODO type specific init
 
-        Material m = GetComponentInChildren<MeshRenderer>().material;
+        Material m = GetComponentInChildren<MeshRenderer>().materials[1];
 
         switch(gemType)
         {
@@ -44,7 +44,7 @@ public class Gem : MonoBehaviour {
     {
         moving = true;
         _movingTime = 0f;
-        foreach (Field f in path) f.Activate();
+        foreach (Field f in path) f.Activate(Color.gray);
     }
 
     private void Update()

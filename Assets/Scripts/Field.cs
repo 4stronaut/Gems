@@ -19,10 +19,10 @@ public class Field : MonoBehaviour {
         path = new List<Field>();
     }
 
-    public void Activate()
+    public void Activate(Color c)
     {
         highlighted = true;
-        GetComponentInChildren<MeshRenderer>().material.color = Color.gray;
+        GetComponentInChildren<MeshRenderer>().material.color = c;
     }
 
     public void Deactivate()
