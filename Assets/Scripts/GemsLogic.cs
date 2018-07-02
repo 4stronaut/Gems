@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class GemsLogic : MonoBehaviour {
 
@@ -11,9 +12,17 @@ public class GemsLogic : MonoBehaviour {
     public ushort neededInRow = 5;
     private int _round = 0;
     private bool _waitForGem = false;
+    private int _score = 0;
+    private int _bonusMulti = 1;
 
     public GameObject basePrefab;
     public GameObject gemPrefab;
+
+    public GameObject startMenu;
+    public GameObject lostMenu;
+    public Text scoreDisplay;
+    public AudioSource music;
+    public Image mute;
 
     private Gem _activeGem;
     private List<Field> _fields;
@@ -26,12 +35,34 @@ public class GemsLogic : MonoBehaviour {
         _mainCam = FindObjectOfType<Camera>();
         _fields = new List<Field>();
         _gems = new List<Gem>();
-        GenerateLevel();
-        NewGems(gemsPerRound);
+    }
+
+    public void Mute()
+    {
+        music.mute = !music.mute;
+        mute.color = music.mute ? Color.white : new Color(0f, 0f, 0f, 0f); 
+        foreach (Gem g in _gems) g.GetComponent<AudioSource>().mute = music.mute;
+    }
+
+    public void Restart()
+    {
+        Debug.Log("RESTART");        
+        Destroy(startMenu.gameObject);
+        lostMenu.SetActive(false);
+        foreach (Gem g in _gems) Destroy(g.gameObject);
+        foreach (Field f in _fields) Destroy(f.gameObject);
+        _gems.Clear();
+        _fields.Clear();
+        _round = 0;
+        _score = 0;
+        _bonusMulti = 1;
+        scoreDisplay.text = _score+" x"+_bonusMulti;
+        StartCoroutine(GenerateLevel());        
     }
 
     void NewGems(int amount)
     {
+        //Debug.Log(amount);
         _round++;
         List<Field> free = new List<Field>();
         for (int i = 0; i < _fields.Count; ++i)
@@ -55,20 +86,24 @@ public class GemsLogic : MonoBehaviour {
                 free.RemoveAt(idx);
             }
         }
+        //possibly a row was finished by the new gems
+        CheckField();
+        ClearLines();
     }
 
     IEnumerator CheckLost()
     {
-        yield return new WaitForSeconds(2);
+        yield return new WaitForSeconds(0.2F);
+        //Debug.Log(_gems.Count + " birds on " + _fields.Count + " fields");
         if (_gems.Count >= _fields.Count) LoseGame();
-        else Debug.Log("Continue...");
+        //else Debug.Log("Continue...");
         yield return null;
     }
 
     void LoseGame()
     {
         Debug.LogWarning("Game Lost");
-        // TODO Lost handling
+        lostMenu.SetActive(true);
     }
 
 
@@ -96,7 +131,7 @@ public class GemsLogic : MonoBehaviour {
                 // stop when target found
                 if (cur == target)
                 {
-                    Debug.Log("Path found after " + step + " steps");
+                    //Debug.Log("Path found after " + step + " steps");
                     cur.path.Add(cur);
                     return cur.path;
                 }
@@ -170,10 +205,11 @@ public class GemsLogic : MonoBehaviour {
             while (f && f.gem && f.gem.gemType == g.gemType) { gcount++; gs.Add(f.gem); f = f.down; }
             if (gcount >= neededInRow)
             {
-                Debug.Log(gs.Count + " in a row");
+                Debug.Log(gs.Count + " in a column");
                 foreach (Gem l in gs) l.field.Activate(Color.yellow);
                 totalLines++;
             }
+            foreach (Gem l in gs) l.field.explored = true;
         }
         //check diagonally/up
         foreach (Gem g in _gems) g.field.explored = false;
@@ -188,10 +224,11 @@ public class GemsLogic : MonoBehaviour {
             while (f && f.gem && f.gem.gemType == g.gemType) { gcount++; gs.Add(f.gem); f = f.down; if (f) f = f.left; }
             if (gcount >= neededInRow)
             {
-                Debug.Log(gs.Count + " in a row");
-                foreach (Gem l in gs) l.field.Activate(Color.yellow);
+                Debug.Log(gs.Count + " diagonal");
+                foreach (Gem l in gs) l.field.Activate(Color.red);
                 totalLines++;
             }
+            foreach (Gem l in gs) l.field.explored = true;
         }
         //check diagonally/down
         foreach (Gem g in _gems) g.field.explored = false;
@@ -206,10 +243,11 @@ public class GemsLogic : MonoBehaviour {
             while (f && f.gem && f.gem.gemType == g.gemType) { gcount++; gs.Add(f.gem); f = f.down; if (f) f = f.right; }
             if (gcount >= neededInRow)
             {
-                Debug.Log(gs.Count + " in a row");
+                Debug.Log(gs.Count + " diagonal");
                 foreach (Gem l in gs) l.field.Activate(Color.yellow);
                 totalLines++;
             }
+            foreach (Gem l in gs) l.field.explored = true;
         }
         return totalLines;
     }
@@ -222,12 +260,16 @@ public class GemsLogic : MonoBehaviour {
             if (f.highlighted)
             {
                 //remove gem
+                _score += _bonusMulti;
                 _gems.Remove(f.gem);
                 Destroy(f.gem.gameObject);
                 f.gem = null;
                 f.Deactivate();
             }
         }
+        // update score display
+        scoreDisplay.text = ""+_score;
+        if(_bonusMulti>1)scoreDisplay.text += " x"+_bonusMulti;
     }
 
 
@@ -237,23 +279,22 @@ public class GemsLogic : MonoBehaviour {
         {
             if (_activeGem.moving) return;
             _waitForGem = false;
+            // deselect active
+            _activeGem.Deactivate();
+            _activeGem = null;
             int linescore = CheckField();
             if (linescore > 0)
             {
                 Debug.Log("Lines cleared: " + linescore);
+                _bonusMulti = Mathf.Max(linescore, _bonusMulti);
                 ClearLines();
             }
             else
             {
+                _bonusMulti = 1;
                 NewGems(gemsPerRound);
+                StartCoroutine(CheckLost());
             }
-        }
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-
-            //NewRound();
-            //StartCoroutine("CheckLost");
-
         }
         // Click or touch
         if (Input.GetMouseButtonDown(0))
@@ -265,12 +306,12 @@ public class GemsLogic : MonoBehaviour {
             {
                 
                 Transform objectHit = hit.transform;
-                Debug.Log("Hit @ "+objectHit.position+ " "+objectHit.name);   
+                //Debug.Log("Hit @ "+objectHit.position+ " "+objectHit.name);   
                 if (objectHit.gameObject.GetComponent<Gem>())
                 {
                     if (_activeGem) _activeGem.Deactivate();
                     _activeGem = objectHit.gameObject.GetComponent<Gem>();
-                    _activeGem.Activate();    
+                    _activeGem.Activate();
                 }
                 else if(objectHit.gameObject.GetComponent<Field>()&&_activeGem)
                 {
@@ -284,22 +325,30 @@ public class GemsLogic : MonoBehaviour {
                 }
             }
         }
+        //DEBUG KEYS
+        //if (Input.GetKeyDown(KeyCode.R)) this.LoseGame();
 	}
 
-    void GenerateLevel()
+    IEnumerator GenerateLevel()
     {
+        Field aField = null;
         // create the fields
         for(int i=0; i<rows; ++i)
         {
             for(int j=0; j<cols; ++j)
             {
-                Field f = Instantiate(basePrefab, Vector3.right * j + Vector3.forward * i, Quaternion.identity).GetComponent<Field>();
-                f.name = "Field" + j + "/" + i;
-                _fields.Add(f);
+                aField = Instantiate(basePrefab, Vector3.right * j + Vector3.forward * i, Quaternion.identity).GetComponent<Field>();
+                aField.name = "Field" + j + "/" + i;
+                _fields.Add(aField);
+                yield return new WaitForSeconds(0.03f);
             }
         }
+        yield return new WaitForSeconds(0.3f);
         // initialize recursive
-        FindObjectOfType<Field>().Init();        
-        _mainCam.transform.position = Vector3.right * cols * 0.5F + Vector3.up*rows;
-    }  
+        aField.Init();
+        //_mainCam.transform.position = Vector3.right * cols * 0.5F + Vector3.up*rows;
+        yield return new WaitForSeconds(0.3f);
+        NewGems(gemsPerRound);
+        yield return null;
+    }
 }

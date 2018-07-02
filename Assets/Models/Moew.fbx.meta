@@ -1,16 +1,143 @@
 fileFormatVersion: 2
 guid: 3354d17f596860b44aae66c620955b98
-timeCreated: 1526130019
-licenseType: Free
 ModelImporter:
   serializedVersion: 22
   fileIDToRecycleName:
     100000: //RootNode
+    100002: Back
+    100004: Body
+    100006: Eye.L
+    100008: Eye.L_end
+    100010: Eye.R
+    100012: Eye.R_end
+    100014: EyeSocket.L
+    100016: EyeSocket.R
+    100018: Hand.L
+    100020: Hand.L_end
+    100022: Hand.R
+    100024: Hand.R_end
+    100026: Head
+    100028: Hip.L
+    100030: Hip.R
+    100032: InnerToe.L
+    100034: InnerToe.R
+    100036: InnerToeTip.L
+    100038: InnerToeTip.L_end
+    100040: InnerToeTip.R
+    100042: InnerToeTip.R_end
+    100044: LowerArm.L
+    100046: LowerArm.L.001
+    100048: LowerBeak
+    100050: LowerBeakTip
+    100052: LowerBeakTip_end
+    100054: LowerLeg.L
+    100056: LowerLeg.R
+    100058: LowerScarf
+    100060: LowerScarf_end
+    100062: MiddleToe.L
+    100064: MiddleToe.R
+    100066: MiddleToeTip.L
+    100068: MiddleToeTip.L_end
+    100070: MiddleToeTip.R
+    100072: MiddleToeTip.R_end
+    100074: Moev
+    100076: MoevSkel
+    100078: OuterToe.L
+    100080: OuterToe.R
+    100082: OuterToeTip.L
+    100084: OuterToeTip.L_end
+    100086: OuterToeTip.R
+    100088: OuterToeTip.R_end
+    100090: Pelvis
+    100092: Root
+    100094: ScarfBase
+    100096: Shoulder.L
+    100098: Shoulder.R
+    100100: Tail
+    100102: TailTip
+    100104: TailTip_end
+    100106: Throat
+    100108: UpperArm.L
+    100110: UpperArm.R
+    100112: UpperBeak
+    100114: UpperBeakTip
+    100116: UpperBeakTip_end
+    100118: UpperLeg.L
+    100120: UpperLeg.R
+    100122: UpperScarf
+    100124: UpperThroat
     400000: //RootNode
+    400002: Back
+    400004: Body
+    400006: Eye.L
+    400008: Eye.L_end
+    400010: Eye.R
+    400012: Eye.R_end
+    400014: EyeSocket.L
+    400016: EyeSocket.R
+    400018: Hand.L
+    400020: Hand.L_end
+    400022: Hand.R
+    400024: Hand.R_end
+    400026: Head
+    400028: Hip.L
+    400030: Hip.R
+    400032: InnerToe.L
+    400034: InnerToe.R
+    400036: InnerToeTip.L
+    400038: InnerToeTip.L_end
+    400040: InnerToeTip.R
+    400042: InnerToeTip.R_end
+    400044: LowerArm.L
+    400046: LowerArm.L.001
+    400048: LowerBeak
+    400050: LowerBeakTip
+    400052: LowerBeakTip_end
+    400054: LowerLeg.L
+    400056: LowerLeg.R
+    400058: LowerScarf
+    400060: LowerScarf_end
+    400062: MiddleToe.L
+    400064: MiddleToe.R
+    400066: MiddleToeTip.L
+    400068: MiddleToeTip.L_end
+    400070: MiddleToeTip.R
+    400072: MiddleToeTip.R_end
+    400074: Moev
+    400076: MoevSkel
+    400078: OuterToe.L
+    400080: OuterToe.R
+    400082: OuterToeTip.L
+    400084: OuterToeTip.L_end
+    400086: OuterToeTip.R
+    400088: OuterToeTip.R_end
+    400090: Pelvis
+    400092: Root
+    400094: ScarfBase
+    400096: Shoulder.L
+    400098: Shoulder.R
+    400100: Tail
+    400102: TailTip
+    400104: TailTip_end
+    400106: Throat
+    400108: UpperArm.L
+    400110: UpperArm.R
+    400112: UpperBeak
+    400114: UpperBeakTip
+    400116: UpperBeakTip_end
+    400118: UpperLeg.L
+    400120: UpperLeg.R
+    400122: UpperScarf
+    400124: UpperThroat
     2100000: Material
     2300000: //RootNode
+    2300002: Moev
     3300000: //RootNode
+    3300002: Moev
     4300000: Cube
+    4300002: Moev
+    9500000: //RootNode
+    13700000: Moev
   externalObjects: {}
   materials:
     importMaterials: 0
@@ -30,7 +157,8 @@ ModelImporter:
     animationRetargetingWarnings: 
     animationDoRetargetingWarnings: 0
     importAnimatedCustomProperties: 0
-    animationCompression: 1
+    importConstraints: 0
+    animationCompression: 3
     animationRotationError: 0.5
     animationPositionError: 0.5
     animationScaleError: 0.5
@@ -79,13 +207,13 @@ ModelImporter:
     armStretch: 0.05
     legStretch: 0.05
     feetSpacing: 0
-    rootMotionBoneName: 
+    rootMotionBoneName: Root
     rootMotionBoneRotation: {x: 0, y: 0, z: 0, w: 1}
     hasTranslationDoF: 0
-    hasExtraRoot: 0
+    hasExtraRoot: 1
     skeletonHasParents: 1
   lastHumanDescriptionAvatarSource: {instanceID: 0}
-  animationType: 0
+  animationType: 2
   humanoidOversampling: 1
   additionalBone: 0
   userData: 

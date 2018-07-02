@@ -9,7 +9,9 @@ public class Gem : MonoBehaviour {
     public Field field = null;
     public List<Field> path = null;
 
+
     private float _movingTime;
+    private AudioSource _sound;
 
 
     public void SetGemType(ushort t)
@@ -17,7 +19,7 @@ public class Gem : MonoBehaviour {
         gemType = t;
         //TODO type specific init
 
-        Material m = GetComponentInChildren<MeshRenderer>().materials[1];
+        Material m = GetComponentInChildren<SkinnedMeshRenderer>().materials[1];
 
         switch(gemType)
         {
@@ -33,11 +35,23 @@ public class Gem : MonoBehaviour {
 
 	public void Activate () {
         selected = true;
-	}
+        _sound.PlayOneShot(_sound.clip);
+        switch (gemType)
+        {
+            case 0:field.Activate(Color.red); break;
+            case 1:field.Activate(Color.green); break;
+            case 2:field.Activate(Color.blue); break;
+            case 3:field.Activate(Color.yellow); break;
+            case 4:field.Activate(Color.cyan); break;
+            case 5: field.Activate(Color.magenta); break;
+            default: break;
+        }
+    }
 	
 	public void Deactivate () {
         selected = false;
-        transform.localScale = Vector3.one;
+        field.Deactivate();
+        //transform.localScale = Vector3.one;
     }
 
     public void Move()
@@ -47,12 +61,14 @@ public class Gem : MonoBehaviour {
         foreach (Field f in path) f.Activate(Color.gray);
     }
 
+    private void Start()
+    {
+        transform.GetChild(0).transform.Rotate(Vector3.up, Random.Range(90F, 270F));
+        _sound = GetComponent<AudioSource>();
+    }
+
     private void Update()
     {
-        if (selected)
-        {
-            transform.localScale = new Vector3(1F, Mathf.Sin(Time.time)*0.3F+0.7F, 1F);
-        }
         if (moving)
         {
             _movingTime += Time.deltaTime *4F;
@@ -60,11 +76,11 @@ public class Gem : MonoBehaviour {
             transform.position = path[curIdx].transform.position;
             if (curIdx == path.Count - 1)
             {
-                moving = false;
                 foreach (Field f in path) f.Deactivate();
                 field.gem = null;
                 field = path[path.Count - 1];
                 field.gem = this;
+                moving = false;
             }
         }
     }
